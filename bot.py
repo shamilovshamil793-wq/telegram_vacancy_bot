@@ -1,15 +1,20 @@
+import os
 import requests
 import logging
+from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
 from telegram.request import HTTPXRequest
 
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+
+if not TOKEN:
+    raise ValueError("BOT_TOKEN не найден в .env файле!")
+
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = "8914204525:AAGeDl9tNLeXTjMKEBPYXf14jhEW_ekP5A"
-
-# Настройка прокси (без прокси)
 request = HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)
 
 def search_vacancies(keyword, pages=1):
@@ -99,9 +104,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ По запросу '{keyword}' ничего не найдено.")
 
 def main():
-    if TOKEN == "YOUR_BOT_TOKEN_HERE":
-        print("⚠️ Укажите токен в переменной TOKEN (получите у @BotFather)")
-        return
     app = Application.builder().token(TOKEN).request(request).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
